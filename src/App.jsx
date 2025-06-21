@@ -264,7 +264,7 @@ function App() {
                   <span>Tailwind CSS</span>
                 </div>
                 <div className="project-links">
-                  <a href="#" className="project-link">Live Demo</a>
+                  <a href="https://ai-image-generator-one-murex.vercel.app/" className="project-link">Live Demo</a>
                   <a href="https://github.com/RameshKChoudhary/AI-image-generator" className="project-link">GitHub</a>
                 </div>
               </div>

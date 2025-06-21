@@ -265,7 +265,7 @@ function App() {
                 </div>
                 <div className="project-links">
                   <a href="#" className="project-link">Live Demo</a>
-                  <a href="#" className="project-link">GitHub</a>
+                  <a href="https://github.com/RameshKChoudhary/AI-image-generator" className="project-link">GitHub</a>
                 </div>
               </div>
             </div>

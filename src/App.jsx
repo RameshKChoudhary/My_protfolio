@@ -139,7 +139,7 @@ function App() {
             <div className="about-text">
               <p>
                 I'm a passionate Full Stack Developer with 1 year of experience creating
-                web applications that make a difference. I specialize in React, Node.js,
+                web applications that make a difference. I specialize in React,
                 and modern web technologies.
               </p>
               <p>
@@ -184,6 +184,7 @@ function App() {
                 <div className="skill-item">JavaScript (ES6+)</div>
                 <div className="skill-item">TypeScript</div>
                 <div className="skill-item">HTML5 & CSS3</div>
+                <div className="skill-item">React Native</div>
                 {/* <div className="skill-item">Sass/SCSS</div> */}
               </div>
             </div>
@@ -191,10 +192,8 @@ function App() {
               <h3>Backend</h3>
               <div className="skill-items">
                 <div className="skill-item">Node.js</div>
-                <div className="skill-item">Express.js</div>
                 <div className="skill-item">Python</div>
                 <div className="skill-item">Django</div>
-                <div className="skill-item">PostgreSQL</div>
                 <div className="skill-item">MongoDB</div>
               </div>
             </div>
@@ -203,7 +202,6 @@ function App() {
               <div className="skill-items">
                 <div className="skill-item">Git & GitHub</div>
                 <div className="skill-item">Docker</div>
-                <div className="skill-item">AWS</div>
                 <div className="skill-item">Figma</div>
                 {/* <div className="skill-item">Jest</div>
                 <div className="skill-item">Webpack</div> */}
@@ -247,25 +245,25 @@ function App() {
             <div className="project-card">
               <div className="project-image">
                 <div className="project-image-placeholder">
-                  <span>AI Image Generator</span>
+                  <span>Healthcare App</span>
                 </div>
               </div>
               <div className="project-content">
-                <h3>AI Image Generator Tool</h3>
+                <h3>Healthcare App (Web/Mobile Application)</h3>
                 <p>
-                Created responsive AI-powered image generation app using Stability AI API for custom artwork 
-                creation. Implemented prompt-to-image functionality with parameter customization for resolution and artistic styles.
+                Developed a responsive healthcare web application that provides Ayurvedic home remedies for common illnesses
+                using a custom Ayurvedic dataset.Built a search-based recommendation system to deliver natural and personalized treatment suggestions
                 </p>
                 <div className="project-tech">
                   <span>React</span>
-                  <span>Node.js</span>
+                  <span>TypeScript</span>
                   <span>Json</span>
-                  <span>Stability AI API</span>
+                  <span>Google Maps API</span>
                   <span>Tailwind CSS</span>
                 </div>
                 <div className="project-links">
-                  <a href="https://ai-image-generator-one-murex.vercel.app/" className="project-link">Live Demo</a>
-                  <a href="https://github.com/RameshKChoudhary/AI-image-generator" className="project-link">GitHub</a>
+                  <a href="https://github.com/RameshKChoudhary" className="project-link">Live Demo</a>
+                  <a href="https://github.com/RameshKChoudhary" className="project-link">GitHub</a>
                 </div>
               </div>
             </div>
@@ -317,7 +315,7 @@ function App() {
                 </div>
                 <div className="contact-item">
                   <span className="contact-icon">📱</span>
-                  <span>+91 9826000000</span>
+                  <span>+91 000000000</span>
                 </div>
                 <div className="contact-item">
                   <span className="contact-icon">📍</span>

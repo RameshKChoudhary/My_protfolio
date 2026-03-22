@@ -175,7 +175,7 @@ function Hero({ go }) {
       <div className="rc-hero-inner">
         <div className="rc-hero-tag">
           <span className="rc-tag-dot" />
-          b.tech aiml · virar, maharashtra · 2026
+          B.tech(aiml) - Virar, Maharashtra, India - 2026
         </div>
         <p className="rc-hero-hi">hey, i'm <span>ramesh</span> 👋</p>
         <h1 className="rc-hero-name">

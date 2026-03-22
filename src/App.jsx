@@ -197,16 +197,139 @@ const styles = `
   .rc-reveal { opacity:0; transform:translateY(24px); transition:opacity 0.65s ease, transform 0.65s ease; }
   .rc-reveal.visible { opacity:1; transform:translateY(0); }
 
+  /* ── HAMBURGER ── */
+  .rc-hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:8px; background:none; border:none; z-index:200; }
+  .rc-hamburger span { display:block; width:22px; height:2px; background:var(--muted); border-radius:2px; transition:all 0.3s; }
+  .rc-hamburger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); background:var(--purple); }
+  .rc-hamburger.open span:nth-child(2) { opacity:0; }
+  .rc-hamburger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); background:var(--purple); }
+
+  /* ── MOBILE DRAWER ── */
+  .rc-mobile-menu {
+    position:fixed; top:60px; left:0; right:0; z-index:99;
+    background:rgba(11,11,20,0.98);
+    backdrop-filter:blur(24px);
+    border-bottom:1px solid var(--border);
+    padding:0;
+    max-height:0; overflow:hidden;
+    transition:max-height 0.35s cubic-bezier(.4,0,.2,1), padding 0.3s;
+  }
+  .rc-mobile-menu.open { max-height:360px; padding:16px 0 24px; }
+  .rc-mobile-menu a {
+    display:block; padding:14px 28px;
+    font-family:var(--font-mono); font-size:0.82rem; letter-spacing:0.1em;
+    color:var(--muted); text-decoration:none; cursor:pointer;
+    transition:all 0.2s; border-left:3px solid transparent;
+  }
+  .rc-mobile-menu a:hover, .rc-mobile-menu a.active { color:var(--purple); border-left-color:var(--purple); background:rgba(124,92,252,0.06); }
+  .rc-mobile-badge { padding:14px 28px; font-family:var(--font-mono); font-size:0.72rem; color:var(--green); display:flex; align-items:center; gap:8px; }
+  .rc-mobile-badge::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); animation:pulse-dot 2s infinite; }
+
+  /* ── TABLET (max 1024px) ── */
+  @media (max-width: 1024px) {
+    .rc-hero { padding:110px 40px 100px; }
+    .rc-hero-stats { right:40px; bottom:40px; gap:24px; }
+    .rc-hstat-num { font-size:1.6rem; }
+    .rc-section, .rc-section-alt { padding:80px 40px; }
+    .rc-divider { margin:0 40px; }
+    .rc-about-grid { gap:40px; }
+    .rc-exp-card { grid-template-columns:140px 1fr; gap:20px; }
+    .rc-projects-grid { grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); }
+    .rc-ach-grid { grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); }
+    .rc-footer { padding:24px 40px; }
+  }
+
+  /* ── MOBILE (max 768px) ── */
   @media (max-width: 768px) {
-    .rc-nav { padding:0 20px; }
+    /* hide desktop cursor on touch */
+    .rc-cur, .rc-cur-ring { display:none; }
+
+    /* nav */
+    .rc-nav { padding:0 20px; height:56px; }
     .rc-nav-pill { display:none; }
-    .rc-hero { padding:100px 24px 120px; }
-    .rc-hero-stats { position:static; flex-wrap:wrap; margin-top:48px; }
-    .rc-section, .rc-section-alt { padding:80px 24px; }
-    .rc-about-grid { grid-template-columns:1fr; gap:40px; }
-    .rc-exp-card { grid-template-columns:1fr; gap:12px; }
-    .rc-footer { flex-direction:column; gap:10px; text-align:center; padding:20px 24px; }
-    .rc-divider { margin:0 24px; }
+    .rc-nav-badge { display:none; }
+    .rc-hamburger { display:flex; }
+
+    /* hero */
+    .rc-hero { padding:80px 20px 160px; min-height:100svh; }
+    .rc-hero-grid { background-size:40px 40px; }
+    .rc-orb1 { width:280px; height:280px; top:-60px; right:-60px; }
+    .rc-orb2 { width:200px; height:200px; }
+    .rc-hero-tag { font-size:0.62rem; padding:5px 12px; margin-bottom:20px; }
+    .rc-hero-greeting { font-size:0.85rem; margin-bottom:8px; }
+    .rc-hero-name { font-size:clamp(2.8rem, 14vw, 4.5rem); margin-bottom:18px; line-height:0.88; }
+    .rc-hero-subtitle { font-size:0.9rem; margin-bottom:28px; max-width:100%; }
+    .rc-hero-chips { gap:8px; margin-bottom:28px; }
+    .rc-chip { font-size:0.65rem; padding:6px 10px; }
+    .rc-hero-ctas { flex-direction:column; gap:10px; }
+    .rc-btn-primary, .rc-btn-ghost { width:100%; text-align:center; padding:14px 20px; }
+    .rc-hero-stats {
+      position:static; margin-top:40px;
+      display:grid; grid-template-columns:1fr 1fr;
+      gap:16px; width:100%;
+    }
+    .rc-hstat { text-align:left; background:var(--card); border:1px solid var(--border2); border-radius:10px; padding:14px 16px; }
+    .rc-hstat-num { font-size:1.5rem; }
+    .rc-hstat-label { font-size:0.58rem; }
+
+    /* ticker */
+    .rc-tick-item { font-size:0.62rem; padding:0 16px; gap:16px; }
+
+    /* sections */
+    .rc-section, .rc-section-alt { padding:60px 20px; }
+    .rc-sec-title { font-size:clamp(1.8rem, 8vw, 2.5rem); margin-bottom:36px; }
+    .rc-divider { margin:0 20px; }
+
+    /* about */
+    .rc-about-grid { grid-template-columns:1fr; gap:32px; }
+    .rc-about-text { font-size:0.92rem; }
+    .rc-about-card { padding:16px 18px; }
+    .rc-about-card-text { font-size:0.72rem; }
+    .rc-about-card-icon { font-size:1.2rem; width:32px; }
+
+    /* skills */
+    .rc-skills-grid { grid-template-columns:1fr; gap:12px; }
+    .rc-skill-card { padding:18px; }
+    .rc-stag { font-size:0.62rem; padding:3px 8px; }
+
+    /* experience */
+    .rc-exp-list { gap:12px; }
+    .rc-exp-card { grid-template-columns:1fr; gap:10px; padding:20px; border-radius:12px; }
+    .rc-exp-card::after { width:100%; height:3px; top:0; left:0; bottom:auto; }
+    .rc-exp-co { font-size:1rem; }
+    .rc-exp-points li { font-size:0.72rem; }
+
+    /* projects */
+    .rc-projects-grid { grid-template-columns:1fr; gap:14px; }
+    .rc-proj-card { padding:22px; border-radius:12px; }
+    .rc-proj-title { font-size:1rem; }
+    .rc-proj-desc { font-size:0.7rem; }
+
+    /* achievements */
+    .rc-ach-grid { grid-template-columns:1fr; gap:10px; }
+    .rc-ach-card { padding:16px 18px; }
+    .rc-ach-title { font-size:0.8rem; }
+    .rc-ach-sub { font-size:0.65rem; }
+
+    /* contact */
+    .rc-contact-cards { flex-direction:column; align-items:stretch; }
+    .rc-contact-card { min-width:0; width:100%; }
+    .rc-contact-sub { font-size:0.76rem; margin-bottom:32px; }
+    .rc-cc-val { font-size:0.7rem; }
+
+    /* footer */
+    .rc-footer { flex-direction:column; gap:8px; text-align:center; padding:20px; font-size:0.6rem; }
+  }
+
+  /* ── SMALL MOBILE (max 380px) ── */
+  @media (max-width: 380px) {
+    .rc-hero-name { font-size:2.4rem; }
+    .rc-hero-stats { grid-template-columns:1fr 1fr; gap:10px; }
+    .rc-hstat-num { font-size:1.2rem; }
+    .rc-section, .rc-section-alt { padding:48px 16px; }
+    .rc-divider { margin:0 16px; }
+    .rc-proj-card { padding:18px; }
+    .rc-about-card { flex-direction:column; gap:8px; }
   }
 `;
 
@@ -353,16 +476,29 @@ function Cursor() {
 
 function Navbar({ activeSection, scrollTo }) {
   const navItems = ['about', 'skills', 'experience', 'projects', 'contact'];
+  const [menuOpen, setMenuOpen] = useState(false);
+  const handleNav = (id) => { scrollTo(id); setMenuOpen(false); };
   return (
-    <nav className="rc-nav">
-      <div className="rc-nav-logo">ramesh<span>.dev</span></div>
-      <div className="rc-nav-pill">
+    <>
+      <nav className="rc-nav">
+        <div className="rc-nav-logo">ramesh<span>.dev</span></div>
+        <div className="rc-nav-pill">
+          {navItems.map(id => (
+            <a key={id} className={activeSection === id ? 'active' : ''} onClick={() => scrollTo(id)}>{id}</a>
+          ))}
+        </div>
+        <div className="rc-nav-badge">open to work</div>
+        <button className={`rc-hamburger${menuOpen ? ' open' : ''}`} onClick={() => setMenuOpen(o => !o)} aria-label="menu">
+          <span /><span /><span />
+        </button>
+      </nav>
+      <div className={`rc-mobile-menu${menuOpen ? ' open' : ''}`}>
         {navItems.map(id => (
-          <a key={id} className={activeSection === id ? 'active' : ''} onClick={() => scrollTo(id)}>{id}</a>
+          <a key={id} className={activeSection === id ? 'active' : ''} onClick={() => handleNav(id)}>{id}</a>
         ))}
+        <div className="rc-mobile-badge">open to work</div>
       </div>
-      <div className="rc-nav-badge">open to work</div>
-    </nav>
+    </>
   );
 }
 
@@ -381,7 +517,7 @@ function Hero({ scrollTo }) {
       <div className="rc-hero-content">
         <div className="rc-hero-tag">
           <span className="rc-hero-tag-dot" />
-          b.tech aiml - virar, maharashtra, India - 2025
+          B.tech(aiml) - Virar, Maharashtra, India - 2025
         </div>
         <p className="rc-hero-greeting">hey, i'm <span>ramesh</span> 👋</p>
         <h1 className="rc-hero-name">

@@ -381,7 +381,7 @@ function Hero({ scrollTo }) {
       <div className="rc-hero-content">
         <div className="rc-hero-tag">
           <span className="rc-hero-tag-dot" />
-          b.tech aiml · virar, maharashtra · 2025
+          b.tech aiml - virar, maharashtra, India - 2025
         </div>
         <p className="rc-hero-greeting">hey, i'm <span>ramesh</span> 👋</p>
         <h1 className="rc-hero-name">

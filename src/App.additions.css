@@ -1,0 +1,74 @@
+/* Additions for the updated App.js — import after App.css */
+
+/* scroll progress bar */
+.rc-progress {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 2px;
+  z-index: 300;
+  background: linear-gradient(90deg, var(--pu), var(--cy));
+  transform: scaleX(0);
+  transform-origin: left;
+  pointer-events: none;
+}
+
+/* anchors used as nav items */
+.rc-nav-logo { text-decoration: none; cursor: pointer; }
+.rc-nav-pill a, .rc-drawer a { cursor: pointer; }
+section[id] { scroll-margin-top: 54px; }
+
+/* typewriter role line */
+.rc-role {
+  font-family: 'Space Mono', monospace;
+  font-size: clamp(0.8rem, 3vw, 1rem);
+  color: var(--cy);
+  margin-bottom: 12px;
+  min-height: 1.4em;
+  animation: fadeUp 0.5s 0.14s ease both;
+}
+.rc-role-pre { color: var(--pu); margin-right: 4px; }
+.rc-caret {
+  display: inline-block;
+  width: 8px; height: 1em;
+  margin-left: 3px;
+  vertical-align: -2px;
+  background: var(--cy);
+  animation: pulse 1s steps(2) infinite;
+}
+
+/* third hero button on mobile */
+.rc-ctas a.rc-btn-g { text-decoration: none; }
+
+/* "more on github" card */
+.rc-pmore {
+  text-decoration: none;
+  align-items: flex-start;
+  justify-content: center;
+  border-style: dashed;
+  border-color: rgba(124,92,252,0.3);
+}
+.rc-pmore-ico { font-size: 1.4rem; }
+.rc-pmore .rc-p-lnk { align-self: flex-start; }
+
+/* keyboard focus */
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--cy);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .rv { opacity: 1; transform: none; }
+}
+
+@media (min-width: 1024px) {
+  section[id] { scroll-margin-top: 60px; }
+}

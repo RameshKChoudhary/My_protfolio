@@ -1,96 +1,126 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './App.css';
+import './App.additions.css';
 
 /* ─────────────────────────────────────────────
-   DATA
+   DATA  (synced with resume — edit here only)
 ───────────────────────────────────────────── */
+const GITHUB = 'https://github.com/RameshKChoudhary';
+
 const skillsData = [
-  { icon:'⚛️', name:'// frontend',         tags:[{l:'react.js',t:'c'},{l:'react native',t:'c'},{l:'typescript',t:'n'},{l:'javascript es6+',t:'n'},{l:'html5',t:'n'},{l:'css3',t:'n'}] },
-  { icon:'🧠', name:'// machine learning', tags:[{l:'scikit-learn',t:'p'},{l:'xgboost',t:'p'},{l:'random forest',t:'p'},{l:'knn · svm',t:'p'},{l:'nlp',t:'p'},{l:'deep learning',t:'p'}] },
-  { icon:'🐍', name:'// data & backend',   tags:[{l:'python',t:'g'},{l:'sql',t:'g'},{l:'pandas',t:'n'},{l:'numpy',t:'n'},{l:'matplotlib',t:'n'},{l:'seaborn',t:'n'}] },
-  { icon:'🤖', name:'// ai & automation',  tags:[{l:'n8n workflows',t:'p'},{l:'ai agents',t:'p'},{l:'openai api',t:'c'},{l:'api integration',t:'n'},{l:'prompt engineering',t:'n'}] },
-  { icon:'📊', name:'// data viz & tools', tags:[{l:'power bi',t:'g'},{l:'excel',t:'n'},{l:'google colab',t:'n'},{l:'kaggle',t:'n'},{l:'git · github',t:'n'},{l:'vs code',t:'n'}] },
-  { icon:'🌟', name:'// soft skills',      tags:[{l:'problem solving',t:'n'},{l:'team collab',t:'n'},{l:'agile',t:'n'},{l:'communication',t:'n'},{l:'prototyping',t:'n'}] },
+  { icon: '🐍', name: '// languages', tags: [
+    { l: 'python', t: 'g' }, { l: 'sql', t: 'g' }, { l: 'javascript', t: 'c' },
+  ] },
+  { icon: '🧠', name: '// ml & deep learning', tags: [
+    { l: 'pytorch', t: 'p' }, { l: 'scikit-learn', t: 'p' }, { l: 'xgboost', t: 'p' },
+    { l: 'random forest', t: 'p' }, { l: 'pandas', t: 'n' }, { l: 'numpy', t: 'n' },
+    { l: 'cross-validation', t: 'n' }, { l: 'feature engineering', t: 'n' },
+  ] },
+  { icon: '🤖', name: '// genai & llms', tags: [
+    { l: 'openai · openrouter · groq', t: 'c' }, { l: 'llama 3.3', t: 'p' },
+    { l: 'whisper (stt)', t: 'p' }, { l: 'rag', t: 'p' }, { l: 'langchain', t: 'n' },
+    { l: 'faiss · chroma', t: 'n' }, { l: 'prompt engineering', t: 'n' }, { l: 'fine-tuning', t: 'n' },
+  ] },
+  { icon: '🚀', name: '// deployment & tools', tags: [
+    { l: 'fastapi', t: 'g' }, { l: 'flask', t: 'g' }, { l: 'streamlit', t: 'g' },
+    { l: 'rest apis', t: 'n' }, { l: 'n8n automation', t: 'p' },
+    { l: 'git · github', t: 'n' }, { l: 'google colab', t: 'n' }, { l: 'kaggle', t: 'n' },
+  ] },
+  { icon: '📊', name: '// data & viz', tags: [
+    { l: 'matplotlib', t: 'n' }, { l: 'seaborn', t: 'n' }, { l: 'plotly', t: 'n' }, { l: 'power bi', t: 'g' },
+  ] },
+  { icon: '⚛️', name: '// web', tags: [
+    { l: 'react.js', t: 'c' }, { l: 'html5', t: 'n' }, { l: 'css3', t: 'n' },
+    { l: 'seo', t: 'n' }, { l: 'responsive ui', t: 'n' }, { l: 'agile', t: 'n' },
+  ] },
 ];
 
+// newest first
 const expsData = [
   {
-    date:'oct 2025', company:'millionminds', role:'// gen ai & llm intern',
-    pts:[
-      'hands-on training in generative ai, llms & prompt engineering — completed with distinction (highest rating)',
-      'built real projects using cutting-edge ai tools in practical workflows',
-      'learned the actual ins and outs of how modern ai systems work',
+    date: 'may 2026 – jul 2026', company: 'sunmarg india', role: '// web developer intern',
+    pts: [
+      'developed & deployed 4 seo-optimised client websites with react.js, html5 and css3 — better visibility and search rankings',
+      'built fully responsive interfaces in a cross-functional agile team',
+      'used git for version control and kept the code clean and maintainable',
     ],
   },
   {
-    date:'nov 2025', company:'blessed it solutions', role:'// data analytics intern',
-    pts:[
-      'cleaned, validated & visualised messy data to pull actual business insights',
-      'built power bi dashboards that made decision-making way faster',
+    date: 'nov 2025', company: 'blessed it solutions', role: '// data analytics intern',
+    pts: [
+      'cleaned, validated & analysed multi-source business datasets in python (pandas)',
+      'built power bi dashboards that sped up executive reporting',
     ],
   },
   {
-    date:'dec 2024 – jan 2025', company:'infosis', role:'// web dev intern',
-    pts:[
-      'built and maintained responsive web pages using html, css, js & react.js',
-      'collabed with cross-functional teams on client-facing frontend features',
-      'shipped code daily in an agile environment with stand-ups and git',
+    date: 'oct 2025 – nov 2025 · remote', company: 'millionminds', role: '// generative ai & llm intern',
+    pts: [
+      'built llm-powered apps with openai / openrouter apis — prompt engineering, fine-tuning and production workflows',
+      'graduated with distinction — the top performance rating in the intern cohort',
     ],
   },
 ];
 
 const featuredProject = {
   title: 'InterviewCoach AI 🎙️',
-  sub: 'ai-powered interview prep app',
-  desc: 'a full-stack ai app built with streamlit where you practice voice answers, get them transcribed via groq whisper, scored locally, then reviewed by llama 3.3 70b — all for free. think of it as your personal interview trainer that never sleeps.',
+  sub: 'multi-stage ai pipeline · speech → llm feedback',
+  desc: 'a working product, not a notebook: record a voice answer, transcribe it with whisper, score it locally, then get structured feedback from llama 3.3 70b — served through a fastapi backend and running on a 100% free-tier stack.',
   features: [
-    { bold:'practice page',  text:'— record voice, transcribe via groq whisper, get local scoring + ai feedback' },
-    { bold:'question bank',  text:'— generate 15 personalised questions with categories, difficulty & why-asked explanations' },
-    { bold:'coding round',   text:'— ai-generated coding problems, live code editor, test runner & full ai code review' },
-    { bold:'dashboard',      text:'— progress charts: score over time, by category, filler words, session history' },
+    { bold: 'practice',      text: '— voice answers → whisper transcription → local scoring → llm feedback' },
+    { bold: 'question bank', text: '— 15 generated questions with difficulty tiers' },
+    { bold: 'coding round',  text: '— live editor with ai code review' },
+    { bold: 'dashboard',     text: '— plotly charts tracking progress across sessions' },
   ],
-  stack:['streamlit','groq whisper','openrouter','llama 3.3 70b','plotly','python','bcrypt','local json'],
-  demo:'#', github:'#',
+  stack: ['python', 'fastapi', 'streamlit', 'groq whisper', 'llama 3.3 70b', 'plotly'],
+  demo: '#',      // paste live demo url
+  github: '#',    // paste repo url
 };
 
 const projectsData = [
-  { num:'01', tag:'ml · forecasting', tc:'rc-t-ml', title:'store sales prediction',
-    desc:'end-to-end retail forecasting using time-series regression. full pipeline: eda, feature engineering, outlier handling, rmse eval. ranked top 30% on kaggle.',
-    stack:['python','pandas','scikit-learn','seaborn'], demo:'#', gh:'#' },
-  { num:'02', tag:'full-stack', tc:'rc-t-fs', title:'healthcare app — web & mobile',
-    desc:'responsive healthcare portal with ayurvedic home remedies + google maps api for nearby clinics. clean ui across all devices, built in react.js',
-    stack:['react.js','google maps api','css3'], demo:'#', gh:'https://github.com/RameshKChoudhary' },
-  { num:'03', tag:'automation', tc:'rc-t-au', title:'automated invoice processing',
-    desc:'n8n workflow automating invoice extraction, validation & processing across multiple apis. basically eliminated manual work entirely.',
-    stack:['n8n','api integration','workflow automation'], demo:'#', gh:'#' },
-  { num:'04', tag:'ml · prediction', tc:'rc-t-ml', title:'medical insurance cost prediction',
-    desc:'regression model predicting annual insurance costs. full pipeline: eda, feature engineering, categorical encoding, scaling & evaluation.',
-    stack:['python','regression','scikit-learn'], demo:'#', gh:'#' },
-  { num:'05', tag:'ml · healthcare', tc:'rc-t-ml', title:'breast cancer prediction (knn)',
-    desc:'knn classifier detecting malignant vs benign cases on real-world data. preprocessing, train-test split and full model evaluation.',
-    stack:['python','knn','scikit-learn'], demo:'#', gh:'#' },
-  { num:'06', tag:'ai app', tc:'rc-t-ai', title:'ai chatbot (openai gpt api)',
-    desc:"context-aware chatbot powered by openai's gpt api. responsive chat ui with smooth interactions and accurate real-time responses.",
-    stack:['openai api','javascript','react'], demo:'https://ai-chat-eight-woad.vercel.app/', gh:'https://github.com/RameshKChoudhary/ai-chat' },
+  {
+    num: '01', tag: 'deep learning', tc: 'rc-t-ml', title: 'image classification — cnn & resnet',
+    desc: 'cnn + resnet in pytorch on cifar-10 with gpu training and batch norm. boosted generalisation with augmentation, weight decay, gradient clipping and a one-cycle lr schedule; tracked accuracy/loss curves.',
+    stack: ['pytorch', 'cnn', 'resnet', 'cifar-10', 'augmentation'], demo: '#', gh: '#',
+  },
+  {
+    num: '02', tag: 'ml · forecasting', tc: 'rc-t-ml', title: 'store sales forecasting',
+    desc: 'end-to-end pipeline: cleaning, outlier handling, feature engineering and rmse-driven model selection with cross-validation (random forest, xgboost). top 30% of thousands on kaggle.',
+    stack: ['python', 'pandas', 'scikit-learn', 'xgboost', 'time series'], demo: '#', gh: '#',
+  },
+  {
+    num: '03', tag: 'automation', tc: 'rc-t-au', title: 'automated invoice processing',
+    desc: 'n8n workflow for invoice extraction, validation and multi-api processing — removed manual data entry entirely.',
+    stack: ['n8n', 'api integration', 'workflow automation'], demo: '#', gh: '#',
+  },
 ];
 
 const achData = [
-  { ico:'🥇', t:'top 30% on kaggle',         s:'ranked among top performers in the retail sales prediction competition' },
-  { ico:'⭐', t:'completed with distinction', s:'generative ai & llm applications at millionminds — highest performance rating' },
-  { ico:'⚡', t:'hackathon participant',       s:'competed and built under real pressure — love the hackathon grind' },
-  { ico:'📊', t:'excel: beginner to expert',  s:'certified proficiency in advanced spreadsheet operations and data work' },
-  { ico:'📈', t:'microsoft excel & power bi', s:'certified in data visualization and business intelligence tooling' },
-  { ico:'🎓', t:'cgpa 8.5',                   s:'b.tech aiml · st. john college of engineering & management, palghar' },
+  { ico: '🥇', t: 'top 30% on kaggle',          s: 'store sales forecasting — thousands of participants' },
+  { ico: '⭐', t: 'graduated with distinction', s: 'millionminds — top rating in the intern cohort' },
+  { ico: '⚡', t: 'megahack 4.0',               s: 'delivered demo-ready projects under tight deadlines' },
+  { ico: '📜', t: 'ml with scikit-learn',       s: 'data school · mar 2026' },
+  { ico: '📜', t: 'open-source llms',           s: 'udemy · feb 2026' },
+  { ico: '📜', t: 'generative ai & llm apps',   s: 'millionminds · oct 2025' },
 ];
 
-const ticks = ['python','react.js','machine learning','n8n automation','data science','power bi','openai api','scikit-learn','xgboost','sql','kaggle top 30%','streamlit','groq whisper'];
+const ticks = [
+  'python', 'pytorch', 'deep learning', 'llms', 'rag', 'fastapi', 'scikit-learn', 'xgboost',
+  'whisper', 'react.js', 'n8n automation', 'sql', 'power bi', 'kaggle top 30%',
+];
+
+const NAV = ['about', 'skills', 'experience', 'projects', 'contact'];
+const SECTION_IDS = ['home', 'about', 'skills', 'experience', 'projects', 'achievements', 'contact'];
 
 /* ─────────────────────────────────────────────
-   REVEAL HOOK
+   HOOKS
 ───────────────────────────────────────────── */
 function useReveal() {
   useEffect(() => {
     const els = document.querySelectorAll('.rv');
+    if (!('IntersectionObserver' in window)) {
+      els.forEach((el) => el.classList.add('in'));
+      return;
+    }
     const io = new IntersectionObserver((entries) => {
       entries.forEach((e, i) => {
         if (e.isIntersecting) {
@@ -99,37 +129,60 @@ function useReveal() {
         }
       });
     }, { threshold: 0.06 });
-    els.forEach(el => io.observe(el));
+    els.forEach((el) => io.observe(el));
     return () => io.disconnect();
-  });
+  }, []); // run once — content is static
+}
+
+function useTypewriter(words, speed = 70, pause = 1400) {
+  const [text, setText] = useState('');
+  useEffect(() => {
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      setText(words[0]);
+      return;
+    }
+    let w = 0, c = 0, del = false, t;
+    const tick = () => {
+      const word = words[w];
+      c += del ? -1 : 1;
+      setText(word.slice(0, c));
+      let d = del ? speed / 2 : speed;
+      if (!del && c === word.length) { del = true; d = pause; }
+      else if (del && c === 0) { del = false; w = (w + 1) % words.length; d = 300; }
+      t = setTimeout(tick, d);
+    };
+    t = setTimeout(tick, 400);
+    return () => clearTimeout(t);
+  }, [words, speed, pause]);
+  return text;
 }
 
 /* ─────────────────────────────────────────────
-   CURSOR  (desktop only — hidden on touch)
+   CURSOR (fine pointers only)
 ───────────────────────────────────────────── */
 function Cursor() {
   const cRef = useRef(null);
   const rRef = useRef(null);
-  const pos  = useRef({ mx:0, my:0, rx:0, ry:0 });
 
   useEffect(() => {
-    if ('ontouchstart' in window) return; // touch device → skip
-    const dot  = cRef.current;
+    if (!window.matchMedia?.('(pointer: fine)').matches) return;
+    const dot = cRef.current;
     const ring = rRef.current;
-    if (dot)  dot.style.display  = 'block';
+    if (dot) dot.style.display = 'block';
     if (ring) ring.style.display = 'block';
 
+    const pos = { mx: 0, my: 0, rx: 0, ry: 0 };
     const onMove = (e) => {
-      pos.current.mx = e.clientX;
-      pos.current.my = e.clientY;
-      if (dot) { dot.style.left = (e.clientX - 4) + 'px'; dot.style.top = (e.clientY - 4) + 'px'; }
+      pos.mx = e.clientX;
+      pos.my = e.clientY;
+      if (dot) { dot.style.left = e.clientX - 4 + 'px'; dot.style.top = e.clientY - 4 + 'px'; }
     };
     document.addEventListener('mousemove', onMove);
     let raf;
     const loop = () => {
-      pos.current.rx += (pos.current.mx - pos.current.rx - 15) * 0.12;
-      pos.current.ry += (pos.current.my - pos.current.ry - 15) * 0.12;
-      if (ring) { ring.style.left = pos.current.rx + 'px'; ring.style.top = pos.current.ry + 'px'; }
+      pos.rx += (pos.mx - pos.rx - 15) * 0.12;
+      pos.ry += (pos.my - pos.ry - 15) * 0.12;
+      if (ring) { ring.style.left = pos.rx + 'px'; ring.style.top = pos.ry + 'px'; }
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
@@ -138,8 +191,8 @@ function Cursor() {
 
   return (
     <>
-      <div ref={cRef} style={{display:'none',width:'8px',height:'8px',background:'#7c5cfc',borderRadius:'50%',position:'fixed',pointerEvents:'none',zIndex:9999,mixBlendMode:'screen'}} />
-      <div ref={rRef} style={{display:'none',width:'30px',height:'30px',border:'1px solid rgba(124,92,252,.45)',borderRadius:'50%',position:'fixed',pointerEvents:'none',zIndex:9998}} />
+      <div ref={cRef} aria-hidden="true" style={{ display: 'none', width: 8, height: 8, background: '#7c5cfc', borderRadius: '50%', position: 'fixed', pointerEvents: 'none', zIndex: 9999, mixBlendMode: 'screen' }} />
+      <div ref={rRef} aria-hidden="true" style={{ display: 'none', width: 30, height: 30, border: '1px solid rgba(124,92,252,.45)', borderRadius: '50%', position: 'fixed', pointerEvents: 'none', zIndex: 9998 }} />
     </>
   );
 }
@@ -149,34 +202,40 @@ function Cursor() {
 ───────────────────────────────────────────── */
 function Navbar({ active, go }) {
   const [open, setOpen] = useState(false);
-  const navItems = ['about','skills','experience','projects','contact'];
 
-  const tap = (id) => { go(id); setOpen(false); };
+  useEffect(() => {
+    const onKey = (e) => e.key === 'Escape' && setOpen(false);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  const handle = (id) => (e) => { e.preventDefault(); go(id); setOpen(false); };
 
   return (
     <>
-      <nav className="rc-nav">
-        <div className="rc-nav-logo">ramesh<span>.dev</span></div>
+      <nav className="rc-nav" aria-label="main">
+        <a href="#home" className="rc-nav-logo" onClick={handle('home')}>ramesh<span>.dev</span></a>
         <div className="rc-nav-pill">
-          {navItems.map(id => (
-            <a key={id} className={active === id ? 'act' : ''} onClick={() => go(id)}>{id}</a>
+          {NAV.map((id) => (
+            <a key={id} href={`#${id}`} className={active === id ? 'act' : ''} onClick={handle(id)}>{id}</a>
           ))}
         </div>
-        <div className="rc-nav-badge">open to work</div>
+        <div className="rc-nav-badge">open to internships</div>
         <button
           className={`rc-hbg${open ? ' open' : ''}`}
-          onClick={() => setOpen(o => !o)}
+          onClick={() => setOpen((o) => !o)}
           aria-label="toggle menu"
+          aria-expanded={open}
         >
-          <span/><span/><span/>
+          <span /><span /><span />
         </button>
       </nav>
 
       <div className={`rc-drawer${open ? ' open' : ''}`}>
-        {navItems.map(id => (
-          <a key={id} className={active === id ? 'act' : ''} onClick={() => tap(id)}>{id}</a>
+        {NAV.map((id) => (
+          <a key={id} href={`#${id}`} className={active === id ? 'act' : ''} onClick={handle(id)}>{id}</a>
         ))}
-        <div className="rc-drawer-badge">open to work</div>
+        <div className="rc-drawer-badge">open to internships</div>
       </div>
     </>
   );
@@ -185,13 +244,16 @@ function Navbar({ active, go }) {
 /* ─────────────────────────────────────────────
    HERO
 ───────────────────────────────────────────── */
+const ROLES = ['ai / ml engineer', 'deep learning builder', 'llm app developer', 'full-stack dev'];
+
 function Hero({ go }) {
+  const role = useTypewriter(ROLES);
   const chips = [
-    {l:'python 🐍',on:true},{l:'react.js ⚛️',on:true},{l:'machine learning 🤖',on:true},
-    {l:'n8n automation',on:false},{l:'scikit-learn',on:false},
-    {l:'groq whisper',on:false},{l:'openai api',on:false},{l:'sql',on:false},
+    { l: 'python 🐍', on: true }, { l: 'pytorch 🔥', on: true }, { l: 'llms & rag 🤖', on: true },
+    { l: 'fastapi', on: false }, { l: 'scikit-learn', on: false },
+    { l: 'whisper', on: false }, { l: 'react.js', on: false }, { l: 'n8n', on: false },
   ];
-  const stats = [['8.5','cgpa'],['6+','projects'],['top 30%','kaggle'],['distinction','gen ai']];
+  const stats = [['8.5', 'cgpa'], ['3', 'internships'], ['top 30%', 'kaggle'], ['distinction', 'gen ai']];
 
   return (
     <section id="home" className="rc-hero">
@@ -202,21 +264,25 @@ function Hero({ go }) {
       <div className="rc-hero-inner">
         <div className="rc-hero-tag">
           <span className="rc-tag-dot" />
-          B.tech(aiml) - Virar, Maharashtra, India - 2026
+          final-year b.tech (ai &amp; ml) · virar, maharashtra · class of 2027
         </div>
 
         <p className="rc-hero-hi">hey, i'm <span>ramesh</span> 👋</p>
 
         <h1 className="rc-hero-name">
-          building<br />
-          <span className="rc-glow">intelligent</span><br />
-          things.
+          turning<br />
+          <span className="rc-glow">models</span><br />
+          into systems.
         </h1>
 
+        <p className="rc-role" aria-live="off">
+          <span className="rc-role-pre">&gt;</span> {role}<span className="rc-caret" />
+        </p>
+
         <p className="rc-hero-sub">
-          full-stack dev × data scientist × ai automation engineer.<br />
-          i turn <b>raw data</b> into predictions, <b>ideas</b> into apps,
-          and <b>workflows</b> into automated machines.
+          i build and ship ml systems <b>end to end</b> — data cleaning, training in
+          <b> pytorch &amp; scikit-learn</b>, evaluation and deployment behind <b>apis</b>.
+          looking for an ai/ml engineering internship.
         </p>
 
         <div className="rc-chips">
@@ -228,6 +294,7 @@ function Hero({ go }) {
         <div className="rc-ctas">
           <button className="rc-btn-p" onClick={() => go('projects')}>see what i built →</button>
           <button className="rc-btn-g" onClick={() => go('contact')}>let's connect</button>
+          <a className="rc-btn-g" href="/Ramesh_Choudhary_Resume.pdf" target="_blank" rel="noreferrer">resume ↗</a>
         </div>
 
         <div className="rc-stats">
@@ -249,7 +316,7 @@ function Hero({ go }) {
 function Ticker() {
   const doubled = [...ticks, ...ticks];
   return (
-    <div className="rc-ticker">
+    <div className="rc-ticker" aria-hidden="true">
       <div className="rc-ticker-t">
         {doubled.map((t, i) => <span key={i} className="rc-ti">{t}</span>)}
       </div>
@@ -262,10 +329,10 @@ function Ticker() {
 ───────────────────────────────────────────── */
 function About() {
   const cards = [
-    { ico:'🎓', t:'b.tech · ai & machine learning',  s:'st. john college of engineering & management · cgpa 8.5' },
-    { ico:'📍', t:'virar, maharashtra',               s:'open to remote & on-site opportunities' },
-    { ico:'⭐', t:'completed with distinction',       s:'generative ai & llm applications · millionminds' },
-    { ico:'🏆', t:'top 30% on kaggle',                s:'retail sales prediction competition leaderboard' },
+    { ico: '🎓', t: 'b.tech · ai & machine learning', s: "st. john college of engineering & management · 2023–2027 · cgpa 8.5" },
+    { ico: '📍', t: 'virar, maharashtra',             s: 'open to mumbai-based, remote & hybrid roles' },
+    { ico: '⭐', t: 'graduated with distinction',     s: 'generative ai & llm applications · millionminds' },
+    { ico: '🏆', t: 'top 30% on kaggle',              s: 'store sales forecasting competition' },
   ];
 
   return (
@@ -274,9 +341,9 @@ function About() {
       <h2 className="rc-sec-h rv">who am i, <span>fr?</span></h2>
       <div className="rc-about-wrap">
         <div className="rc-about-txt rv">
-          <p>i'm <b>ramesh choudhary</b> — a b.tech aiml student at st. john college of engineering &amp; management, palghar. i build stuff that actually works: ml models, web apps, and automated workflows.</p>
-          <p>been deep in the <b>data science grind</b> — preprocessing, feature engineering, model training, the whole pipeline. also love building frontend in react and wiring automation flows in n8n ☕</p>
-          <p>currently <b>open for internships</b> in data science, full-stack, or ai automation. if you're building something cool, let's talk.</p>
+          <p>i'm <b>ramesh choudhary</b> — a final-year b.tech ai &amp; ml student who ships ml systems end to end: data cleaning, feature engineering, <b>pytorch</b> &amp; <b>scikit-learn</b> training, evaluation, and deployment behind apis.</p>
+          <p>my favourite builds chain several models into one product — like <b>interviewcoach ai</b>, a speech → whisper → llama 3.3 pipeline running on a fully free-tier stack. i also automate workflows in n8n and build clean react frontends.</p>
+          <p>currently <b>open for ai/ml engineering internships</b> where i can turn models into reliable, real-world systems.</p>
         </div>
         <div className="rc-about-cards rv">
           {cards.map((c, i) => (
@@ -349,36 +416,42 @@ function Experience() {
 /* ─────────────────────────────────────────────
    PROJECTS
 ───────────────────────────────────────────── */
+function Links({ demo, gh, className = 'rc-p-links' }) {
+  if (demo === '#' && gh === '#') return null;
+  return (
+    <div className={className}>
+      {demo !== '#' && <a href={demo} target="_blank" rel="noreferrer" className="rc-p-lnk">live demo ↗</a>}
+      {gh !== '#' && <a href={gh} target="_blank" rel="noreferrer" className="rc-p-lnk">github ↗</a>}
+    </div>
+  );
+}
+
 function Projects() {
+  const f = featuredProject;
   return (
     <section id="projects" className="rc-seca">
       <div className="rc-sec-lbl rv">projects</div>
       <h2 className="rc-sec-h rv">stuff i <span>shipped</span></h2>
 
-      {/* featured */}
       <div className="rc-feat-banner rv">
         <div className="rc-feat-label">featured project</div>
-        <div className="rc-feat-title">{featuredProject.title}</div>
-        <div className="rc-feat-sub">{featuredProject.sub}</div>
-        <div className="rc-feat-desc">{featuredProject.desc}</div>
+        <div className="rc-feat-title">{f.title}</div>
+        <div className="rc-feat-sub">{f.sub}</div>
+        <div className="rc-feat-desc">{f.desc}</div>
         <div className="rc-feat-features">
-          {featuredProject.features.map((f, i) => (
-            <div key={i} className="rc-feat-feat"><b>{f.bold}</b>{f.text}</div>
+          {f.features.map((x, i) => (
+            <div key={i} className="rc-feat-feat"><b>{x.bold} </b>{x.text}</div>
           ))}
         </div>
         <div className="rc-feat-stack">
-          {featuredProject.stack.map((s, i) => <span key={i} className="rc-ps">{s}</span>)}
+          {f.stack.map((s, i) => <span key={i} className="rc-ps">{s}</span>)}
         </div>
-        <div className="rc-feat-links">
-          {featuredProject.demo !== '#' && <a href={featuredProject.demo} target="_blank" rel="noreferrer" className="rc-p-lnk">live demo ↗</a>}
-          {featuredProject.github !== '#' && <a href={featuredProject.github} target="_blank" rel="noreferrer" className="rc-p-lnk">github ↗</a>}
-        </div>
+        <Links demo={f.demo} gh={f.github} className="rc-feat-links" />
       </div>
 
-      {/* grid */}
       <div className="rc-proj-grid">
-        {projectsData.map((p, i) => (
-          <div key={i} className="rc-pcard rv">
+        {projectsData.map((p) => (
+          <div key={p.num} className="rc-pcard rv">
             <div className="rc-p-top">
               <span className="rc-p-num">{p.num}</span>
               <span className={`rc-p-tag ${p.tc}`}>{p.tag}</span>
@@ -388,26 +461,28 @@ function Projects() {
             <div className="rc-p-stack">
               {p.stack.map((s, j) => <span key={j} className="rc-ps">{s}</span>)}
             </div>
-            {(p.demo !== '#' || p.gh !== '#') && (
-              <div className="rc-p-links">
-                {p.demo !== '#' && <a href={p.demo} target="_blank" rel="noreferrer" className="rc-p-lnk">live demo ↗</a>}
-                {p.gh   !== '#' && <a href={p.gh}   target="_blank" rel="noreferrer" className="rc-p-lnk">github ↗</a>}
-              </div>
-            )}
+            <Links demo={p.demo} gh={p.gh} />
           </div>
         ))}
+
+        <a className="rc-pcard rc-pmore rv" href={GITHUB} target="_blank" rel="noreferrer">
+          <span className="rc-pmore-ico">💻</span>
+          <h3 className="rc-p-title">more on github</h3>
+          <p className="rc-p-desc">notebooks, experiments and smaller builds live here.</p>
+          <span className="rc-p-lnk">github.com/RameshKChoudhary ↗</span>
+        </a>
       </div>
     </section>
   );
 }
 
 /* ─────────────────────────────────────────────
-   ACHIEVEMENTS
+   ACHIEVEMENTS & CERTIFICATIONS
 ───────────────────────────────────────────── */
 function Achievements() {
   return (
-    <section className="rc-sec">
-      <div className="rc-sec-lbl rv">achievements</div>
+    <section id="achievements" className="rc-sec">
+      <div className="rc-sec-lbl rv">certifications &amp; achievements</div>
       <h2 className="rc-sec-h rv">the <span>w's</span> 🏆</h2>
       <div className="rc-ach-grid">
         {achData.map((a, i) => (
@@ -429,31 +504,34 @@ function Achievements() {
 ───────────────────────────────────────────── */
 function Contact() {
   const links = [
-    { ico:'✉️', lbl:'email',    val:'rameshkchoudhary10@gmail.com', href:'mailto:rameshkchoudhary10@gmail.com' },
-    { ico:'📱', lbl:'phone',    val:'+91 96994 11468',              href:'tel:+919699411468' },
-    { ico:'🔗', lbl:'linkedin', val:'in/ramesh-choudhary',          href:'https://www.linkedin.com/in/ramesh-choudhary-397025291/' },
-    { ico:'💻', lbl:'github',   val:'RameshKChoudhary',             href:'https://github.com/RameshKChoudhary' },
+    { ico: '✉️', lbl: 'email',    val: 'rameshkchoudhary10@gmail.com', href: 'mailto:rameshkchoudhary10@gmail.com' },
+    { ico: '📱', lbl: 'phone',    val: '+91 96994 11468',              href: 'tel:+919699411468' },
+    { ico: '🔗', lbl: 'linkedin', val: 'in/ramesh-choudhary',          href: 'https://www.linkedin.com/in/ramesh-choudhary-397025291/' },
+    { ico: '💻', lbl: 'github',   val: 'RameshKChoudhary',             href: GITHUB },
   ];
 
   return (
     <section id="contact" className="rc-seca">
       <div className="rc-con-inner">
         <div className="rc-sec-lbl center rv">contact</div>
-        <h2 className="rc-con-h rv">let's <span className="rc-glow">collab</span>.</h2>
+        <h2 className="rc-con-h rv">let's <span className="rc-glow">build</span>.</h2>
         <p className="rc-con-sub rv">
-          open to internships, freelance projects &amp; collabs in data science,
-          full-stack or ai automation. my dms are always open — i respond fast 🚀
+          open to ai/ml engineering internships — mumbai-based or remote. if you're shipping
+          something with models in it, i'd love to help 🚀
         </p>
         <div className="rc-con-cards rv">
-          {links.map((c, i) => (
-            <a key={i} href={c.href} target="_blank" rel="noreferrer" className="rc-ccard">
-              <span className="rc-cc-ico">{c.ico}</span>
-              <div className="rc-cc-wrap">
-                <span className="rc-cc-lbl">{c.lbl}</span>
-                <span className="rc-cc-val">{c.val}</span>
-              </div>
-            </a>
-          ))}
+          {links.map((c, i) => {
+            const external = c.href.startsWith('http');
+            return (
+              <a key={i} href={c.href} {...(external ? { target: '_blank', rel: 'noreferrer' } : {})} className="rc-ccard">
+                <span className="rc-cc-ico">{c.ico}</span>
+                <div className="rc-cc-wrap">
+                  <span className="rc-cc-lbl">{c.lbl}</span>
+                  <span className="rc-cc-val">{c.val}</span>
+                </div>
+              </a>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -467,8 +545,8 @@ function Footer() {
   return (
     <footer className="rc-foot">
       <div>made with 💜 by ramesh choudhary</div>
-      <div>b.tech aiml · <span>st. john college, palghar</span></div>
-      <div>virar, maharashtra · 2026</div>
+      <div>b.tech ai &amp; ml · <span>st. john college, palghar</span></div>
+      <div>virar, maharashtra · {new Date().getFullYear()}</div>
     </footer>
   );
 }
@@ -478,45 +556,62 @@ function Footer() {
 ───────────────────────────────────────────── */
 export default function App() {
   const [active, setActive] = useState('home');
+  const progRef = useRef(null);
 
-  // scroll spy
   useEffect(() => {
-    const ids = ['home','about','skills','experience','projects','contact'];
-    const onScroll = () => {
-      const y = window.scrollY + 70;
-      for (const id of ids) {
+    let ticking = false;
+    const update = () => {
+      const y = window.scrollY;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      if (progRef.current) progRef.current.style.transform = `scaleX(${max > 0 ? y / max : 0})`;
+
+      const probe = y + 90;
+      let current = 'home';
+      for (const id of SECTION_IDS) {
         const el = document.getElementById(id);
-        if (el && y >= el.offsetTop && y < el.offsetTop + el.offsetHeight) {
-          setActive(id);
-          break;
-        }
+        if (el && probe >= el.offsetTop) current = id;
       }
+      setActive(current);
+      ticking = false;
     };
+    const onScroll = () => {
+      if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    };
+    update();
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    window.addEventListener('resize', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
   }, []);
 
   useReveal();
 
-  const go = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  const go = useCallback((id) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
 
   return (
     <>
+      <div className="rc-progress" ref={progRef} aria-hidden="true" />
       <Cursor />
       <Navbar active={active} go={go} />
-      <Hero go={go} />
-      <Ticker />
-      <About />
-      <div className="rc-div" />
-      <Skills />
-      <div className="rc-div" />
-      <Experience />
-      <div className="rc-div" />
-      <Projects />
-      <div className="rc-div" />
-      <Achievements />
-      <div className="rc-div" />
-      <Contact />
+      <main>
+        <Hero go={go} />
+        <Ticker />
+        <About />
+        <div className="rc-div" />
+        <Skills />
+        <div className="rc-div" />
+        <Experience />
+        <div className="rc-div" />
+        <Projects />
+        <div className="rc-div" />
+        <Achievements />
+        <div className="rc-div" />
+        <Contact />
+      </main>
       <Footer />
     </>
   );

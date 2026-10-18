@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './App.css';
-import './App.additions.css';
 
 /* ─────────────────────────────────────────────
    DATA  (synced with resume — edit here only)
@@ -191,8 +190,8 @@ function Cursor() {
 
   return (
     <>
-      <div ref={cRef} aria-hidden="true" style={{ display: 'none', width: 8, height: 8, background: '#7c5cfc', borderRadius: '50%', position: 'fixed', pointerEvents: 'none', zIndex: 9999, mixBlendMode: 'screen' }} />
-      <div ref={rRef} aria-hidden="true" style={{ display: 'none', width: 30, height: 30, border: '1px solid rgba(124,92,252,.45)', borderRadius: '50%', position: 'fixed', pointerEvents: 'none', zIndex: 9998 }} />
+      <div ref={cRef} aria-hidden="true" style={{ display: 'none', width: 8, height: 8, background: '#5b3df5', borderRadius: '50%', position: 'fixed', pointerEvents: 'none', zIndex: 9999 }} />
+      <div ref={rRef} aria-hidden="true" style={{ display: 'none', width: 30, height: 30, border: '1.5px solid rgba(91,61,245,.5)', borderRadius: '50%', position: 'fixed', pointerEvents: 'none', zIndex: 9998 }} />
     </>
   );
 }

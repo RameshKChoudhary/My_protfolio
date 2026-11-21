@@ -20,14 +20,20 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: clip; }
+/* neutralise Vite's default index.css, which boxes #root into a narrow centered column */
+html, body, #root {
+  width: 100%; max-width: none; margin: 0; padding: 0; border: 0;
+  display: block; min-height: 0; text-align: left;
+}
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: var(--font-b);
-  line-height: 1.6;
-  overflow-x: hidden;
+  font: 400 16px/1.6 var(--font-b);
+  letter-spacing: normal;
+  overflow-x: clip;
 }
+h1, h2, h3, h4, p { margin: 0; color: inherit; }
 a { color: inherit; text-decoration: none; }
 ul { list-style: none; }
 img { display: block; width: 100%; height: 100%; object-fit: cover; }
@@ -116,7 +122,7 @@ section { position: relative; z-index: 2; }
   font-family: var(--font-m); font-size: 12px; letter-spacing: 0.14em;
   text-transform: uppercase; color: var(--orange); margin-bottom: 18px;
 }
-h1, h2, h3, h4 { font-family: var(--font-d); line-height: 1.02; letter-spacing: -0.02em; }
+h1, h2, h3, h4 { font-family: var(--font-d); font-weight: 800; line-height: 1.02; letter-spacing: -0.02em; color: var(--ink); }
 h2 { font-size: clamp(34px, 5.2vw, 68px); font-weight: 800; }
 h2 em, .contact h2 em { font-family: var(--font-s); font-style: italic; font-weight: 400; color: var(--orange); }
 .section-head { max-width: 1100px; margin: 0 auto 50px; padding: 0 24px; }
@@ -151,8 +157,9 @@ h2 em, .contact h2 em { font-family: var(--font-s); font-style: italic; font-wei
   min-height: 100vh; display: grid; grid-template-columns: 1.1fr 0.9fr; align-items: center;
   gap: 30px; max-width: 1200px; margin: 0 auto; padding: 120px 24px 60px;
 }
-.hero h1 { font-size: clamp(54px, 9vw, 128px); font-weight: 800; }
-.split { display: inline-block; perspective: 600px; }
+.hero-copy { min-width: 0; }
+.hero h1 { font-size: clamp(40px, 4.8vw, 68px); font-weight: 800; white-space: nowrap; }
+.split { display: inline-block; perspective: 600px; white-space: nowrap; }
 .split span {
   display: inline-block; transform-origin: 50% 100%;
   animation: letterIn 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
@@ -260,8 +267,8 @@ h2 em, .contact h2 em { font-family: var(--font-s); font-style: italic; font-wei
 .exp-card li::before { content: "→"; position: absolute; left: 0; color: var(--orange); }
 
 /* ---------- pinned horizontal 3D projects ---------- */
-.hscroll { height: 400vh; }
-.h-sticky { position: sticky; top: 0; height: 100vh; overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
+.hscroll { height: 300vh; }
+.h-sticky { position: sticky; top: 0; height: 100vh; overflow: hidden; display: flex; flex-direction: column; justify-content: center; padding-top: 70px; }
 .h-title { padding: 0 max(24px, 6vw); margin-bottom: 26px; }
 .h-title h2 { font-size: clamp(44px, 7vw, 100px); }
 .h-title .hint { font-family: var(--font-m); font-size: 12px; color: var(--muted); margin-top: 6px; }
@@ -290,7 +297,7 @@ h2 em, .contact h2 em { font-family: var(--font-s); font-style: italic; font-wei
 
 /* ---------- skills ---------- */
 .skills { padding: 100px 24px 120px; }
-.ring-wrap { height: 220px; perspective: 1000px; display: grid; place-items: center; margin-bottom: 40px; overflow: visible; }
+.ring-wrap { height: 300px; perspective: 1000px; display: grid; place-items: center; margin-bottom: 60px; overflow: visible; }
 .skill-ring {
   --r: 360px; position: relative; width: 150px; height: 50px; transform-style: preserve-3d;
   animation: spin 28s linear infinite; transform: rotateX(-12deg);
@@ -301,6 +308,7 @@ h2 em, .contact h2 em { font-family: var(--font-s); font-style: italic; font-wei
   font-family: var(--font-d); font-weight: 700; font-size: 17px; text-align: center;
   background: var(--paper); border: 1.5px solid var(--ink); border-radius: 14px;
   transform: rotateY(var(--a)) translateZ(var(--r));
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
 }
 .skill-ring span:nth-child(3n) { background: var(--sun); }
 .skill-ring span:nth-child(3n+1) { background: #dbe3ff; }
@@ -333,13 +341,17 @@ footer { margin-top: 60px; font-family: var(--font-m); font-size: 12px; color: v
 @media (max-width: 900px) {
   .nav nav a:not(.pill) { display: none; }
   .hero { grid-template-columns: 1fr; padding-top: 110px; }
+  .hero h1 { font-size: min(9.4vw, 68px); }
   .stage { height: 420px; }
   .about { grid-template-columns: 1fr; }
   .about-card { padding: 28px; }
   .skill-grid { grid-template-columns: 1fr; }
   .skill-ring { --r: 240px; }
+  .world .cube, .world .ring { opacity: 0.35; }
+  .world .c1, .world .r1 { display: none; }
+  .ring-wrap { height: 240px; }
   .hscroll { height: auto; padding: 60px 0; }
-  .h-sticky { position: static; height: auto; overflow: visible; }
+  .h-sticky { position: static; height: auto; overflow: visible; padding-top: 0; }
   .h-track { flex-direction: column; width: auto; gap: 28px; padding: 10px 24px; }
   .pcard { width: 100%; transform: none; }
   .h-bar, .h-title .hint { display: none; }

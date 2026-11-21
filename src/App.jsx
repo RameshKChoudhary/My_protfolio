@@ -1,232 +1,192 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import './App.css';
 
-// ── Animated background particles ──────────────────────────────────────────
-function BgCanvas() {
-  const particles = Array.from({ length: 30 }, (_, i) => ({
-    id: i,
-    left: `${Math.random() * 100}%`,
-    delay: `${Math.random() * 20}s`,
-    duration: `${10 + Math.random() * 20}s`,
-    size: Math.random() > 0.5 ? '3px' : '2px',
-    opacity: 0.3 + Math.random() * 0.5,
-  }));
+/* ─── Custom Cursor ─────────────────────────────────────── */
+function Cursor() {
+  const dot  = useRef(null);
+  const ring = useRef(null);
+  const pos  = useRef({ x: 0, y: 0 });
+  const ring_pos = useRef({ x: 0, y: 0 });
+  const raf  = useRef(null);
+
+  useEffect(() => {
+    const onMove = e => { pos.current = { x: e.clientX, y: e.clientY }; };
+    const loop = () => {
+      if (dot.current)  { dot.current.style.left = pos.current.x + 'px'; dot.current.style.top = pos.current.y + 'px'; }
+      ring_pos.current.x += (pos.current.x - ring_pos.current.x) * 0.12;
+      ring_pos.current.y += (pos.current.y - ring_pos.current.y) * 0.12;
+      if (ring.current) { ring.current.style.left = ring_pos.current.x + 'px'; ring.current.style.top = ring_pos.current.y + 'px'; }
+      raf.current = requestAnimationFrame(loop);
+    };
+
+    const onEnter = () => { dot.current?.classList.add('hovering');  ring.current?.classList.add('hovering'); };
+    const onLeave = () => { dot.current?.classList.remove('hovering'); ring.current?.classList.remove('hovering'); };
+
+    window.addEventListener('mousemove', onMove);
+    document.querySelectorAll('a, button, .project-card, .skill-cell, .cert-item, .about-tag')
+      .forEach(el => { el.addEventListener('mouseenter', onEnter); el.addEventListener('mouseleave', onLeave); });
+
+    raf.current = requestAnimationFrame(loop);
+    return () => { window.removeEventListener('mousemove', onMove); cancelAnimationFrame(raf.current); };
+  }, []);
 
   return (
-    <div className="bg-canvas">
-      <div className="bg-grid" />
-      <div className="bg-orb" />
-      <div className="bg-orb" />
-      <div className="bg-orb" />
-      <div className="particles">
-        {particles.map(p => (
-          <span
-            key={p.id}
-            className="particle"
-            style={{
-              left: p.left,
-              width: p.size,
-              height: p.size,
-              animationDelay: p.delay,
-              animationDuration: p.duration,
-            }}
-          />
-        ))}
-      </div>
-    </div>
+    <>
+      <div className="cursor"      ref={dot}  />
+      <div className="cursor-ring" ref={ring} />
+    </>
   );
 }
 
-// ── Scroll-reveal hook ─────────────────────────────────────────────────────
+/* ─── Scroll Reveal Hook ────────────────────────────────── */
 function useReveal() {
   useEffect(() => {
-    const els = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+    const els = document.querySelectorAll('.rv, .rv-stagger');
     const obs = new IntersectionObserver(
-      entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
-      { threshold: 0.12 }
+      entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); }),
+      { threshold: 0.1, rootMargin: '0px 0px -60px 0px' }
     );
     els.forEach(el => obs.observe(el));
     return () => obs.disconnect();
   }, []);
 }
 
-// ── Typing animation hook ──────────────────────────────────────────────────
-function useTyping(words) {
-  const [text, setText] = useState('');
-  const [wordIdx, setWordIdx] = useState(0);
-  const [deleting, setDeleting] = useState(false);
-
-  useEffect(() => {
-    const current = words[wordIdx];
-    const speed = deleting ? 50 : 100;
-    const pause = deleting ? 400 : 1800;
-
-    const timeout = setTimeout(() => {
-      if (!deleting && text === current) {
-        setTimeout(() => setDeleting(true), pause);
-      } else if (deleting && text === '') {
-        setDeleting(false);
-        setWordIdx(i => (i + 1) % words.length);
-      } else {
-        setText(prev => deleting ? prev.slice(0, -1) : current.slice(0, prev.length + 1));
-      }
-    }, speed);
-
-    return () => clearTimeout(timeout);
-  }, [text, deleting, wordIdx, words]);
-
-  return text;
-}
-
-// ── Navbar ─────────────────────────────────────────────────────────────────
+/* ─── Navbar ────────────────────────────────────────────── */
 function Navbar() {
   const [scrolled, setScrolled] = useState(false);
-
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
+    const fn = () => setScrolled(window.scrollY > 60);
+    window.addEventListener('scroll', fn);
+    return () => window.removeEventListener('scroll', fn);
   }, []);
 
   return (
     <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
       <div className="container">
         <div className="nav-inner">
-          <a href="#hero" className="nav-logo">RC.</a>
+          <a href="#hero" className="nav-logo">RC<span>.</span></a>
           <ul className="nav-links">
-            {['About', 'Skills', 'Experience', 'Projects', 'Contact'].map(s => (
+            {['About','Skills','Experience','Projects','Contact'].map(s => (
               <li key={s}><a href={`#${s.toLowerCase()}`}>{s}</a></li>
             ))}
           </ul>
+          <a href="mailto:rameshkchoudhary10@gmail.com" className="nav-cta">Hire me</a>
         </div>
       </div>
     </nav>
   );
 }
 
-// ── Hero ───────────────────────────────────────────────────────────────────
+/* ─── Hero ──────────────────────────────────────────────── */
 function Hero() {
-  const roles = ['AI Engineer', 'ML Engineer', 'LLM Developer', 'Full-Stack Builder'];
-  const typedRole = useTyping(roles);
-
   return (
     <section className="hero" id="hero">
-      <div className="container" style={{ position: 'relative' }}>
-        <div className="hero-inner">
-          <div className="hero-content">
-            <div className="hero-eyebrow">
-              <span className="dot" />
-              Available for Internships
-            </div>
+      <div className="hero-mesh">
+        <div className="mesh-blob" /><div className="mesh-blob" /><div className="mesh-blob" />
+      </div>
+      <div className="hero-grid" />
 
-            <h1 className="hero-name">
-              Hi, I'm{' '}
-              <span className="gradient-text">Ramesh Choudhary</span>
-            </h1>
+      <div className="container">
+        <div className="hero-eyebrow">AI Engineer · ML Engineer · Mumbai / Remote</div>
 
-            <p className="hero-role">
-              <span className="typing">{typedRole}</span>
-            </p>
+        <h1 className="hero-headline">
+          <span className="hero-line">Building</span>
+          <span className="hero-line">Intelligent</span>
+          <span className="hero-line"><span className="outline-text">Systems.</span></span>
+        </h1>
 
-            <p className="hero-desc">
-              Final-year B.Tech AI/ML student at SJCEM (CGPA 8.5) building
-              intelligent systems — from RAG pipelines and LLM integrations to
-              end-to-end ML models. Currently seeking AI/ML internships in Mumbai or remote.
-            </p>
-
-            <div className="hero-cta">
-              <a
-                href="https://github.com/RameshKChoudhary"
-                className="btn btn-primary"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                ⚡ View GitHub
-              </a>
-              <a href="#contact" className="btn btn-outline">Get in Touch →</a>
-            </div>
-          </div>
-
-          <div className="hero-photo-wrap">
-            <div className="hero-photo-ring-2" />
-            <div className="hero-photo-ring" />
-            <img
-              src="/photo-formal.jpg"
-              alt="Ramesh Choudhary"
-              className="hero-photo"
-              onError={e => {
-                e.currentTarget.src = `https://ui-avatars.com/api/?name=Ramesh+Choudhary&background=7c5cfc&color=fff&size=240&bold=true`;
-              }}
-            />
-            <div className="hero-badges">
-              <div className="hero-badge"><span className="badge-icon">🤖</span> LLM / RAG</div>
-              <div className="hero-badge"><span className="badge-icon">🧠</span> ML / DL</div>
-              <div className="hero-badge"><span className="badge-icon">⚛️</span> React</div>
-            </div>
+        <div className="hero-bottom">
+          <p className="hero-desc">
+            Final-year B.Tech AI/ML student at SJCEM (CGPA 8.5).
+            I build LLM pipelines, RAG systems, ML models and AI-powered
+            automation workflows that go from prototype to production fast.
+          </p>
+          <div className="hero-actions">
+            <a href="#projects" className="btn-hero btn-hero-primary">View Work ↓</a>
+            <a href="https://github.com/RameshKChoudhary" className="btn-hero btn-hero-ghost"
+               target="_blank" rel="noopener noreferrer">GitHub ↗</a>
           </div>
         </div>
+      </div>
 
-        <div className="scroll-indicator">
-          <div className="scroll-mouse"><div className="scroll-wheel" /></div>
-          <span>Scroll</span>
-        </div>
+      <div className="hero-scroll">
+        <div className="scroll-line" />
+        <span>Scroll</span>
       </div>
     </section>
   );
 }
 
-// ── About ──────────────────────────────────────────────────────────────────
+/* ─── Marquee ───────────────────────────────────────────── */
+const MARQUEE_ITEMS = [
+  'LLM Engineering', 'RAG Pipelines', 'PyTorch', 'LangChain',
+  'n8n Automation', 'Prompt Engineering', 'FastAPI', 'React.js',
+  'Scikit-learn', 'Vector Databases', 'Groq Whisper', 'Streamlit',
+];
+
+function Marquee() {
+  const doubled = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS];
+  return (
+    <div className="marquee-section">
+      <div className="marquee-track">
+        {doubled.map((item, i) => (
+          <div className="marquee-item" key={i}>
+            <span className="marquee-dot" />
+            {item}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─── About ─────────────────────────────────────────────── */
 function About() {
   return (
-    <section className="about" id="about">
+    <section id="about">
       <div className="container">
-        <div className="about-inner">
-          <div className="about-photo-wrap reveal-left">
-            <div className="about-photo-deco" />
-            <img
-              src="/photo-casual.jpg"
-              alt="Ramesh at a cultural event"
-              className="about-photo"
-              onError={e => {
-                e.currentTarget.src = `https://ui-avatars.com/api/?name=RC&background=12121a&color=7c5cfc&size=380&bold=true`;
-              }}
-            />
-            <div className="about-stat-row">
-              <div className="about-stat">
-                <span className="stat-num">8.5</span>
-                <span className="stat-label">CGPA</span>
-              </div>
-              <div className="about-stat">
-                <span className="stat-num">2+</span>
-                <span className="stat-label">Internships</span>
-              </div>
-              <div className="about-stat">
-                <span className="stat-num">Top 30%</span>
-                <span className="stat-label">Kaggle</span>
+        <div className="about-wrap">
+          <div className="about-photo-col rv">
+            <div className="about-img-frame">
+              <img
+                src="/photo-casual.jpg"
+                alt="Ramesh Choudhary"
+                className="about-img"
+                onError={e => { e.currentTarget.src = `https://ui-avatars.com/api/?name=RC&background=0e0e1a&color=9b7fff&size=600&bold=true&font-size=0.3`; }}
+              />
+              <div className="about-img-badge">
+                <span className="badge-num">8.5</span>
+                <span className="badge-label">CGPA / 10</span>
               </div>
             </div>
           </div>
 
-          <div className="about-text reveal-right">
-            <div className="section-header" style={{ textAlign: 'left', marginBottom: '24px' }}>
-              <span className="section-label">About Me</span>
-              <h2 className="section-title">Building AI that<br />actually works</h2>
+          <div className="about-text-col rv">
+            <div>
+              <div className="s-label">About me</div>
+              <h2 className="s-title">AI/ML Engineer<br />from Virar, Mumbai</h2>
             </div>
             <p>
-              I'm a final-year B.Tech student in AI & Machine Learning at SJCEM, Palghar —
-              passionate about bridging the gap between cutting-edge research and real-world
-              applications. Based in Virar, Maharashtra, I focus on the western railway corridor
-              for onsite roles, but I'm equally comfortable remote.
+              I'm a final-year B.Tech student in Artificial Intelligence &amp; Machine
+              Learning at SJCEM, Palghar — building things at the intersection of
+              LLMs, automation and intelligent applications. I move fast from
+              prototype to working tool and I document what I build.
             </p>
             <p>
-              My work spans LLM integrations, RAG pipelines, predictive ML models, and
-              full-stack web applications. I've shipped production features as an AI Intern at
-              Blessed IT Solutions and built client websites at Sunmarg India. When not coding,
-              I'm competing on Kaggle or exploring Indic NLP.
+              Interned at Blessed IT Solutions (AI) and Sunmarg India (web). Currently
+              seeking AI/ML internships along Mumbai's western railway corridor or remote,
+              with a minimum stipend of ₹8,000/month.
             </p>
-            <a href="mailto:rameshkchoudhary10@gmail.com" className="btn btn-primary">
-              📩 Let's Connect
-            </a>
+            <div className="about-tags rv-stagger">
+              {['LLM APIs','RAG','n8n','Prompt Eng.','PyTorch','FastAPI','React.js','Kaggle Top 30%'].map(t => (
+                <span className="about-tag" key={t}>{t}</span>
+              ))}
+            </div>
+            <div>
+              <a href="#contact" className="btn-hero btn-hero-primary" style={{ display:'inline-flex' }}>
+                Get in touch →
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -234,69 +194,38 @@ function About() {
   );
 }
 
-// ── Skills ─────────────────────────────────────────────────────────────────
-const skillsData = [
-  {
-    icon: '🤖',
-    category: 'Core Focus',
-    title: 'Generative AI & LLMs',
-    tags: ['LLM APIs', 'Prompt Engineering', 'RAG', 'LangChain', 'LangGraph', 'FastAPI', 'Vector DBs', 'LoRA / QLoRA'],
-  },
-  {
-    icon: '🧠',
-    category: 'Machine Learning',
-    title: 'ML & Deep Learning',
-    tags: ['Scikit-learn', 'PyTorch', 'TensorFlow', 'XGBoost', 'CNNs', 'Transformers', 'BERT', 'Time-Series'],
-  },
-  {
-    icon: '📊',
-    category: 'Data Science',
-    title: 'Data Analysis & NLP',
-    tags: ['Pandas', 'NumPy', 'EDA', 'Feature Engineering', 'TF-IDF', 'Word2Vec', 'Plotly', 'Streamlit'],
-  },
-  {
-    icon: '⚛️',
-    category: 'Development',
-    title: 'Full-Stack Web',
-    tags: ['React.js', 'JavaScript (ES6+)', 'HTML5', 'CSS3', 'FastAPI', 'Docker', 'Git', 'GitHub'],
-  },
-  {
-    icon: '🗄️',
-    category: 'Databases',
-    title: 'Data & Infra',
-    tags: ['SQL', 'Vector Databases', 'Google Colab', 'VS Code', 'Docker'],
-  },
-  {
-    icon: '📈',
-    category: 'Visualization',
-    title: 'Analytics & Dashboards',
-    tags: ['Plotly', 'Matplotlib', 'Streamlit', 'Pandas Profiling'],
-  },
+/* ─── Skills ────────────────────────────────────────────── */
+const SKILLS = [
+  { icon:'🤖', name:'Generative AI & LLMs', pills:['LLM APIs','Prompt Eng.','RAG','LangChain','LangGraph','LoRA/QLoRA'] },
+  { icon:'🔄', name:'AI Automation', pills:['n8n','API Integration','Workflow Design','Firecrawl API','FastAPI'] },
+  { icon:'🧠', name:'Machine Learning', pills:['Scikit-learn','XGBoost','Time-Series','Cross-Validation','Feature Eng.'] },
+  { icon:'🔬', name:'Deep Learning & NLP', pills:['PyTorch','TensorFlow','CNN','Transformers','BERT','LSTM'] },
+  { icon:'📊', name:'Data & Analytics', pills:['Pandas','NumPy','EDA','Plotly','Matplotlib','SQL'] },
+  { icon:'⚛️', name:'Full-Stack Dev', pills:['React.js','FastAPI','Django','Streamlit','Docker','Git'] },
 ];
 
 function Skills() {
   return (
-    <section id="skills">
+    <section id="skills" className="skills-section">
       <div className="container">
-        <div className="section-header reveal">
-          <span className="section-label">What I Know</span>
-          <h2 className="section-title">Technical Skills</h2>
-          <p className="section-subtitle">
-            Specialized in AI/ML engineering with practical full-stack development experience.
+        <div className="skills-header rv">
+          <div>
+            <div className="s-label">What I work with</div>
+            <h2 className="s-title">Technical Skills</h2>
+          </div>
+          <p className="s-sub">
+            Specialized in AI/ML engineering with practical automation and
+            full-stack development. Comfortable going from raw data to deployed AI feature.
           </p>
         </div>
-        <div className="skills-grid">
-          {skillsData.map((s, i) => (
-            <div
-              className="skill-card reveal"
-              key={s.title}
-              style={{ transitionDelay: `${i * 0.07}s` }}
-            >
-              <span className="skill-icon">{s.icon}</span>
-              <span className="skill-category">{s.category}</span>
-              <h3>{s.title}</h3>
-              <div className="skill-tags">
-                {s.tags.map(t => <span className="skill-tag" key={t}>{t}</span>)}
+
+        <div className="skills-grid rv-stagger">
+          {SKILLS.map(s => (
+            <div className="skill-cell" key={s.name}>
+              <div className="skill-cell-icon">{s.icon}</div>
+              <div className="skill-cell-name">{s.name}</div>
+              <div className="skill-pills">
+                {s.pills.map(p => <span className="skill-pill" key={p}>{p}</span>)}
               </div>
             </div>
           ))}
@@ -306,49 +235,47 @@ function Skills() {
   );
 }
 
-// ── Experience ─────────────────────────────────────────────────────────────
-const expData = [
+/* ─── Experience ────────────────────────────────────────── */
+const EXP = [
   {
-    emoji: '💼',
-    role: 'Web Developer Intern',
     company: 'Sunmarg India',
     period: 'Mar 2026 – Jun 2026',
+    role: 'Web Developer Intern',
     bullets: [
       'Built and deployed 4 SEO-optimized, fully responsive client websites using React.js, HTML5 and CSS3, ensuring consistent UI across devices and browsers.',
       'Worked in an Agile team (daily stand-ups, Git workflow) with cross-functional members to ship production-ready features and fix UI issues.',
     ],
   },
   {
-    emoji: '🤖',
-    role: 'AI Intern',
     company: 'Blessed IT Solutions',
     period: 'Oct 2025 – Dec 2025',
+    role: 'AI Intern',
     bullets: [
-      'Integrated AI-powered features into website workflows using LLM APIs to improve user interaction and automate repetitive tasks.',
-      'Applied prompt engineering techniques to optimize LLM outputs, improve response accuracy, and align AI-generated content with website requirements.',
+      'Built AI-powered workflows into website operations by integrating LLM APIs, automating repetitive tasks and improving user interaction.',
+      'Applied prompt engineering to improve LLM output accuracy and keep AI-generated content aligned with business requirements.',
     ],
   },
 ];
 
 function Experience() {
   return (
-    <section className="experience" id="experience">
+    <section id="experience">
       <div className="container">
-        <div className="section-header reveal">
-          <span className="section-label">Work History</span>
-          <h2 className="section-title">Experience</h2>
+        <div className="rv" style={{ marginBottom: 64 }}>
+          <div className="s-label">Work history</div>
+          <h2 className="s-title">Experience</h2>
         </div>
-        <div className="timeline">
-          {expData.map((e, i) => (
-            <div className="timeline-item reveal" key={e.role} style={{ transitionDelay: `${i * 0.15}s` }}>
-              <div className="timeline-dot">{e.emoji}</div>
-              <div className="timeline-card">
-                <div className="timeline-meta">
-                  <span className="timeline-company">{e.company}</span>
-                  <span className="timeline-period">{e.period}</span>
-                </div>
-                <h3 className="timeline-role">{e.role}</h3>
-                <ul className="timeline-bullets">
+
+        <div className="exp-list">
+          {EXP.map((e, i) => (
+            <div className="exp-item rv" key={e.role} style={{ transitionDelay: `${i * 0.12}s` }}>
+              <div className="exp-left">
+                <div className="exp-company">{e.company}</div>
+                <div className="exp-period">{e.period}</div>
+              </div>
+              <div className="exp-right">
+                <h3 className="exp-role">{e.role}</h3>
+                <ul className="exp-bullets">
                   {e.bullets.map((b, j) => <li key={j}>{b}</li>)}
                 </ul>
               </div>
@@ -360,67 +287,107 @@ function Experience() {
   );
 }
 
-// ── Projects ───────────────────────────────────────────────────────────────
-const projectsData = [
+/* ─── Projects ──────────────────────────────────────────── */
+const PROJECTS = [
+  {
+    emoji: '🎙️',
+    name: 'InterviewCoach AI',
+    desc: 'Voice-based AI interview trainer using Groq Whisper for STT and LLaMA 3.3 70B for structured feedback. 15-question bank with difficulty tiers, live coding round with AI code review, and a Plotly progress dashboard.',
+    tags: ['LLaMA 3.3','Groq Whisper','Streamlit','Plotly','FastAPI'],
+    featured: true,
+    num: '01',
+  },
+  {
+    emoji: '📄',
+    name: 'Automated Invoice Processing',
+    desc: 'n8n workflow that extracts and validates invoice data automatically, routes it across APIs, and eliminates manual data entry and human error.',
+    tags: ['n8n','API Integration','Workflow Automation'],
+    num: '02',
+  },
   {
     emoji: '🏪',
-    title: 'Store Sales Forecasting',
-    desc: 'End-to-end time-series pipeline covering data cleaning, outlier handling, EDA and feature engineering. Trained XGBoost models with cross-validated RMSE — ranked Top 30% on Kaggle.',
-    tags: ['Python', 'XGBoost', 'Pandas', 'Scikit-learn', 'Time-Series'],
-    github: 'https://github.com/RameshKChoudhary',
+    name: 'Store Sales Forecasting',
+    desc: 'End-to-end time-series pipeline with XGBoost. Covered data cleaning, EDA, feature engineering, cross-validated RMSE. Ranked Top 30% on Kaggle.',
+    tags: ['XGBoost','Pandas','Scikit-learn','Time-Series'],
+    num: '03',
+  },
+  {
+    emoji: '🌐',
+    name: 'Web Data Extraction',
+    desc: 'Configured Firecrawl API to scrape websites and turn pages into structured data for LLM workflows — zero manual copy-paste.',
+    tags: ['Firecrawl API','LLM Workflows','Python'],
+    num: '04',
   },
   {
     emoji: '🎬',
-    title: 'Movie Recommendation System',
-    desc: 'Hybrid recommender blending collaborative filtering (user-item rating similarity) with content-based filtering (TF-IDF, cosine similarity) into one ranked list.',
-    tags: ['Python', 'Scikit-learn', 'TF-IDF', 'Collaborative Filtering'],
-    github: 'https://github.com/RameshKChoudhary',
+    name: 'Movie Recommendation System',
+    desc: 'Hybrid recommender blending collaborative filtering (user-item ratings) with content-based filtering (TF-IDF, cosine similarity) into one ranked list.',
+    tags: ['Scikit-learn','TF-IDF','Collaborative Filtering'],
+    num: '05',
   },
   {
     emoji: '🖼️',
-    title: 'CIFAR-10 Image Classifier',
-    desc: 'ResNet-9 style CNN trained with data augmentation, batch normalization, dropout, and a one-cycle learning-rate schedule. Tracked accuracy and loss curves to tune the model.',
-    tags: ['PyTorch', 'CNN', 'ResNet', 'GPU Training', 'Deep Learning'],
-    github: 'https://github.com/RameshKChoudhary',
-  },
-  {
-    emoji: '🎙️',
-    title: 'InterviewCoach AI',
-    desc: 'Voice-based AI interview trainer using Groq Whisper for STT and LLaMA 3.3 70B for structured feedback. 15-question bank with an interactive Plotly analytics dashboard.',
-    tags: ['LLaMA 3.3', 'Groq Whisper', 'Streamlit', 'Plotly', 'LLM'],
-    github: 'https://github.com/RameshKChoudhary',
+    name: 'CIFAR-10 Classifier',
+    desc: 'ResNet-9 style CNN trained with data augmentation, batch norm, dropout, and a one-cycle LR schedule in PyTorch. Tracked accuracy/loss curves.',
+    tags: ['PyTorch','CNN','ResNet','GPU Training'],
+    num: '06',
   },
 ];
 
 function Projects() {
+  const GH = 'https://github.com/RameshKChoudhary';
+  const featured = PROJECTS.find(p => p.featured);
+  const rest = PROJECTS.filter(p => !p.featured);
+
   return (
-    <section id="projects">
+    <section id="projects" style={{ background: 'var(--bg2)' }}>
       <div className="container">
-        <div className="section-header reveal">
-          <span className="section-label">What I've Built</span>
-          <h2 className="section-title">Projects</h2>
-          <p className="section-subtitle">
-            From Kaggle competitions to AI-powered tools — here's a selection of my work.
+        <div className="projects-header rv">
+          <div>
+            <div className="s-label">What I've built</div>
+            <h2 className="s-title">Projects</h2>
+          </div>
+          <p className="s-sub" style={{ maxWidth: 360 }}>
+            From Kaggle competitions to production AI tools and automation pipelines.
           </p>
         </div>
-        <div className="projects-grid">
-          {projectsData.map((p, i) => (
-            <div
-              className="project-card reveal"
-              key={p.title}
-              style={{ transitionDelay: `${i * 0.1}s` }}
-            >
-              <div className="project-top">
-                <span className="project-emoji">{p.emoji}</span>
-                <div className="project-links">
-                  <a href={p.github} className="project-link" target="_blank" rel="noopener noreferrer" title="GitHub">⌨</a>
+
+        <div className="projects-grid rv-stagger">
+          {/* Featured */}
+          <div className="project-card featured">
+            <div className="project-visual">
+              <div className="project-visual-glow" />
+              <span style={{ fontSize:'6rem', zIndex:1 }}>{featured.emoji}</span>
+            </div>
+            <div className="project-body">
+              <span className="project-num">{featured.num}</span>
+              <h3 className="project-name">{featured.name}</h3>
+              <p className="project-desc">{featured.desc}</p>
+              <div className="project-footer">
+                <div className="project-tags">
+                  {featured.tags.map(t => <span className="project-tag" key={t}>{t}</span>)}
                 </div>
+                <a href={GH} className="project-arrow" target="_blank" rel="noopener noreferrer">↗</a>
+              </div>
+            </div>
+          </div>
+
+          {/* Rest */}
+          {rest.map(p => (
+            <div className="project-card" key={p.name}>
+              <div className="project-visual" style={{ minHeight:160 }}>
+                <div className="project-visual-glow" />
+                <span style={{ zIndex:1 }}>{p.emoji}</span>
               </div>
               <div className="project-body">
-                <h3 className="project-title">{p.title}</h3>
+                <span className="project-num">{p.num}</span>
+                <h3 className="project-name">{p.name}</h3>
                 <p className="project-desc">{p.desc}</p>
-                <div className="project-tags">
-                  {p.tags.map(t => <span className="project-tag" key={t}>{t}</span>)}
+                <div className="project-footer">
+                  <div className="project-tags">
+                    {p.tags.map(t => <span className="project-tag" key={t}>{t}</span>)}
+                  </div>
+                  <a href={GH} className="project-arrow" target="_blank" rel="noopener noreferrer">↗</a>
                 </div>
               </div>
             </div>
@@ -431,32 +398,28 @@ function Projects() {
   );
 }
 
-// ── Certifications ─────────────────────────────────────────────────────────
-const certsData = [
-  { icon: '🎓', name: 'Machine Learning with Scikit-learn', issuer: 'Data School · Mar 2026' },
-  { icon: '🤖', name: 'Open-Source LLMs', issuer: 'Udemy · Feb 2026' },
-  { icon: '✨', name: 'Generative AI & LLM Applications (Distinction)', issuer: 'MillionMinds' },
-  { icon: '⚛️', name: 'Frontend Web Developer', issuer: 'Udemy · May 2026' },
-  { icon: '🏆', name: 'Kaggle Top 30%', issuer: 'Retail Sales Forecasting' },
-  { icon: '⚡', name: 'Hackathon Participant', issuer: 'Megahack 4.0' },
+/* ─── Certifications ────────────────────────────────────── */
+const CERTS = [
+  { icon:'🤖', name:'Generative AI & LLM Applications', issuer:'MillionMinds — Distinction' },
+  { icon:'📚', name:'Open-Source LLMs', issuer:'Udemy · Feb 2026' },
+  { icon:'🧪', name:'Machine Learning with Scikit-learn', issuer:'Data School · Mar 2026' },
+  { icon:'⚛️', name:'Frontend Web Developer', issuer:'Udemy · May 2026' },
+  { icon:'🏆', name:'Kaggle Top 30%', issuer:'Retail Sales Forecasting' },
+  { icon:'⚡', name:'Hackathon Participant', issuer:'Megahack 4.0' },
 ];
 
 function Certifications() {
   return (
-    <section className="certs" id="certifications">
+    <section id="certifications" className="certs-section">
       <div className="container">
-        <div className="section-header reveal">
-          <span className="section-label">Credentials</span>
-          <h2 className="section-title">Certifications & Achievements</h2>
+        <div className="rv" style={{ marginBottom:64 }}>
+          <div className="s-label">Credentials</div>
+          <h2 className="s-title">Certifications &amp; Achievements</h2>
         </div>
-        <div className="certs-grid">
-          {certsData.map((c, i) => (
-            <div
-              className="cert-card reveal"
-              key={c.name}
-              style={{ transitionDelay: `${i * 0.07}s` }}
-            >
-              <span className="cert-icon">{c.icon}</span>
+        <div className="certs-grid rv-stagger">
+          {CERTS.map(c => (
+            <div className="cert-item" key={c.name}>
+              <div className="cert-icon-wrap">{c.icon}</div>
               <div className="cert-info">
                 <div className="cert-name">{c.name}</div>
                 <div className="cert-issuer">{c.issuer}</div>
@@ -469,31 +432,49 @@ function Certifications() {
   );
 }
 
-// ── Contact ────────────────────────────────────────────────────────────────
+/* ─── Contact ───────────────────────────────────────────── */
 function Contact() {
   return (
-    <section id="contact">
+    <section id="contact" className="contact-section">
+      <div className="contact-bg-text">HELLO</div>
       <div className="container">
-        <div className="contact-inner reveal">
-          <span className="section-label">Let's Talk</span>
-          <h2 className="section-title">Get in Touch</h2>
-          <p className="section-subtitle">
-            Looking for AI/ML internships in Mumbai or remote. Open to data science,
-            ML engineering, and full-stack AI roles. Minimum ₹8k/month stipend.
-          </p>
+        <div className="contact-inner">
+          <div className="contact-text rv">
+            <div>
+              <div className="s-label">Let's work together</div>
+              <h2 className="s-title">Got an<br />opportunity?</h2>
+            </div>
+            <p>
+              I'm actively looking for AI/ML internships in Mumbai (western railway)
+              or remote. Open to data science, ML engineering, AI automation, and
+              full-stack AI roles.
+            </p>
+            <a href="mailto:rameshkchoudhary10@gmail.com" className="contact-email-link">
+              rameshkchoudhary10@gmail.com
+            </a>
+            <div className="contact-note">
+              <span>● Available now</span> · Minimum ₹8,000/month · Virar, Maharashtra
+            </div>
+          </div>
 
-          <span className="contact-email">rameshkchoudhary10@gmail.com</span>
-
-          <div className="contact-links">
-            <a href="https://github.com/RameshKChoudhary" className="contact-link" target="_blank" rel="noopener noreferrer">
-              ⌨ GitHub
-            </a>
-            <a href="https://linkedin.com/in/ramesh-choudhary-397025291" className="contact-link" target="_blank" rel="noopener noreferrer">
-              💼 LinkedIn
-            </a>
-            <a href="https://my-protfolio-two-chi.vercel.app/" className="contact-link" target="_blank" rel="noopener noreferrer">
-              🌐 Portfolio
-            </a>
+          <div className="contact-links-col rv">
+            <div className="s-label" style={{ marginBottom:0 }}>Find me online</div>
+            <div className="social-row">
+              {[
+                { icon:'⌨️', label:'GitHub',    href:'https://github.com/RameshKChoudhary' },
+                { icon:'💼', label:'LinkedIn',  href:'https://linkedin.com/in/ramesh-choudhary-397025291' },
+                { icon:'🌐', label:'Portfolio', href:'https://my-protfolio-two-chi.vercel.app/' },
+              ].map(s => (
+                <a key={s.label} href={s.href} className="social-link"
+                   target="_blank" rel="noopener noreferrer">
+                  <span style={{ display:'flex', alignItems:'center', gap:12 }}>
+                    <span className="social-link-icon">{s.icon}</span>
+                    {s.label}
+                  </span>
+                  <span className="social-link-arrow">→</span>
+                </a>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -501,26 +482,31 @@ function Contact() {
   );
 }
 
-// ── Footer ─────────────────────────────────────────────────────────────────
+/* ─── Footer ────────────────────────────────────────────── */
 function Footer() {
   return (
     <footer>
       <div className="container">
-        <p>Built with <span>♥</span> by Ramesh Choudhary · 2026</p>
+        <div className="foot-inner">
+          <a href="#hero" className="foot-logo">RC.</a>
+          <span className="foot-copy">© 2026 Ramesh Choudhary</span>
+          <a href="#hero" className="foot-top">Back to top ↑</a>
+        </div>
       </div>
     </footer>
   );
 }
 
-// ── App ────────────────────────────────────────────────────────────────────
+/* ─── App ───────────────────────────────────────────────── */
 export default function App() {
   useReveal();
-
   return (
     <div className="app">
-      <BgCanvas />
+      <div className="noise" aria-hidden="true" />
+      <Cursor />
       <Navbar />
       <Hero />
+      <Marquee />
       <About />
       <Skills />
       <Experience />

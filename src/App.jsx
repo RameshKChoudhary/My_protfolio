@@ -157,7 +157,7 @@ function About() {
           <div className="about-photo-col rv">
             <div className="about-img-frame">
               <img
-                src="/photo-casual.jpg"
+                src="/photo-casual.jpeg"
                 alt="Ramesh Choudhary"
                 className="about-img"
                 onError={e => { e.currentTarget.src = `https://ui-avatars.com/api/?name=RC&background=0e0e1a&color=9b7fff&size=600&bold=true&font-size=0.3`; }}

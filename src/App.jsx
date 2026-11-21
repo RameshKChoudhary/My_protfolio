@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './App.css';
 
 /* ─── Custom Cursor ─────────────────────────────────────── */
@@ -23,11 +23,19 @@ function Cursor() {
     const onLeave = () => { dot.current?.classList.remove('hovering'); ring.current?.classList.remove('hovering'); };
 
     window.addEventListener('mousemove', onMove);
-    document.querySelectorAll('a, button, .project-card, .skill-cell, .cert-item, .about-tag')
-      .forEach(el => { el.addEventListener('mouseenter', onEnter); el.addEventListener('mouseleave', onLeave); });
+
+    // Delay so all elements are mounted before we query them
+    const tid = setTimeout(() => {
+      document.querySelectorAll('a, button, .project-card, .skill-cell, .cert-item, .about-tag')
+        .forEach(el => { el.addEventListener('mouseenter', onEnter); el.addEventListener('mouseleave', onLeave); });
+    }, 500);
 
     raf.current = requestAnimationFrame(loop);
-    return () => { window.removeEventListener('mousemove', onMove); cancelAnimationFrame(raf.current); };
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      cancelAnimationFrame(raf.current);
+      clearTimeout(tid);
+    };
   }, []);
 
   return (
@@ -149,7 +157,7 @@ function About() {
           <div className="about-photo-col rv">
             <div className="about-img-frame">
               <img
-                src="/photo-casual.jpeg"
+                src="/photo-casual.jpg"
                 alt="Ramesh Choudhary"
                 className="about-img"
                 onError={e => { e.currentTarget.src = `https://ui-avatars.com/api/?name=RC&background=0e0e1a&color=9b7fff&size=600&bold=true&font-size=0.3`; }}

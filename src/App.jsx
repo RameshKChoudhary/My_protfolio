@@ -3,10 +3,10 @@ import "./App.css";
 
 /* -------------------------------------------------------------
    PHOTOS: save your two photos in the /public folder as
-   photo1.jpg (festive kurta photo) and photo2.jpg (blazer photo)
+   photo1.jpeg (festive kurta photo) and photo2.jpeg (blazer photo)
    ------------------------------------------------------------- */
-const PHOTO_1 = "/photo1.jpg";
-const PHOTO_2 = "/photo2.jpg";
+const PHOTO_1 = "/photo1.jpeg";
+const PHOTO_2 = "/photo2.jpeg";
 
 const LINKS = {
   email: "rameshkchoudhary10@gmail.com",

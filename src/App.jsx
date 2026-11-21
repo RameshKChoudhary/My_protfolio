@@ -3,10 +3,10 @@ import "./App.css";
 
 /* -------------------------------------------------------------
    PHOTOS: save your two photos in the /public folder as
-   photo1.jpeg (festive kurta photo) and photo2.jpeg (blazer photo)
+   photo1.jpg (festive kurta photo) and photo2.jpg (blazer photo)
    ------------------------------------------------------------- */
-const PHOTO_1 = "/photo1.jpeg";
-const PHOTO_2 = "/photo2.jpeg";
+const PHOTO_1 = "/photo1.jpg";
+const PHOTO_2 = "/photo2.jpg";
 
 const LINKS = {
   email: "rameshkchoudhary10@gmail.com",
@@ -134,11 +134,14 @@ function useScene() {
         const track = hs.querySelector(".h-track");
         if (vw < 900) {
           track.style.transform = "";
+          hs.style.height = "";
         } else {
-          const r = hs.getBoundingClientRect();
-          const total = r.height - vh;
-          const p = Math.max(0, Math.min(1, -r.top / total));
           const dist = Math.max(0, track.scrollWidth - vw);
+          const wantH = Math.round(dist + vh);
+          if (Math.abs(hs.offsetHeight - wantH) > 2) hs.style.height = `${wantH}px`;
+          const r = hs.getBoundingClientRect();
+          const total = Math.max(1, r.height - vh);
+          const p = Math.max(0, Math.min(1, -r.top / total));
           track.style.transform = `translate3d(${-p * dist}px,0,0)`;
           hs.style.setProperty("--hp", p.toFixed(4));
           hs.querySelectorAll(".pcard").forEach((c) => {
@@ -157,7 +160,10 @@ function useScene() {
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
+    window.addEventListener("load", onScroll);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(onScroll);
     return () => {
+      window.removeEventListener("load", onScroll);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
       cancelAnimationFrame(raf);
